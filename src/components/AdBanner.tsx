@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ExternalLink, Sparkles } from 'lucide-react';
 import { AD_CONFIG } from '../data/dramas';
 
@@ -11,12 +11,55 @@ interface AdBannerProps {
 }
 
 export const AdBanner: React.FC<AdBannerProps> = ({ type, className = '', onAdClick, id, slotLabel }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rawCode = type === 'horizontal' ? AD_CONFIG.BANNER_HORIZONTAL : AD_CONFIG.BANNER_KOTAK;
+  const isDefaultPlaceholder = !rawCode || rawCode.includes('Paste script iklan');
+
+  // Dynamically execute embedded script tags for networks like JuicyAds / Google Ads / Adsterra
+  useEffect(() => {
+    if (isDefaultPlaceholder || !containerRef.current) return;
+
+    const container = containerRef.current;
+    container.innerHTML = '';
+
+    // Create a temporary element to parse tags
+    const temp = document.createElement('div');
+    temp.innerHTML = rawCode;
+
+    // Append standard elements & re-create <script> tags so browser executes them
+    Array.from(temp.childNodes).forEach((node) => {
+      if (node.nodeName === 'SCRIPT') {
+        const oldScript = node as HTMLScriptElement;
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach((attr) => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+        newScript.textContent = oldScript.textContent;
+        container.appendChild(newScript);
+      } else {
+        container.appendChild(node.cloneNode(true));
+      }
+    });
+  }, [rawCode, isDefaultPlaceholder]);
+
   const slotId = id || (type === 'horizontal' ? 'ad-banner-horizontal-slot' : 'ad-banner-kotak-slot');
+
+  if (!isDefaultPlaceholder) {
+    return (
+      <div className={`w-full flex justify-center my-3 sm:my-4 ${className}`}>
+        <div 
+          id={slotId}
+          ref={containerRef}
+          onClick={onAdClick}
+          className="overflow-hidden flex items-center justify-center min-h-[50px] sm:min-h-[90px] max-w-full"
+        />
+      </div>
+    );
+  }
 
   if (type === 'horizontal') {
     return (
       <div className={`w-full max-w-5xl mx-auto my-4 sm:my-5 ${className}`}>
-        {/* BANNER_HORIZONTAL = "<!-- Paste script iklan horizontal 728x90 di sini -->" */}
         <div 
           id={slotId}
           onClick={onAdClick}
@@ -59,7 +102,6 @@ export const AdBanner: React.FC<AdBannerProps> = ({ type, className = '', onAdCl
 
   return (
     <div className={`w-full flex justify-center my-4 ${className}`}>
-      {/* BANNER_KOTAK = "<!-- Paste script iklan kotak 300x250 di sini -->" */}
       <div 
         id={slotId}
         onClick={onAdClick}

@@ -2,8 +2,16 @@ import { Drama } from '../types';
 
 export const AD_CONFIG = {
   DIRECT_LINK: "<!-- Paste script iklan DIRECT LINK di sini -->",
-  BANNER_KOTAK: "<!-- Paste script iklan kotak 300x250 di sini -->",
-  BANNER_HORIZONTAL: "<!-- Paste script iklan horizontal 728x90 di sini -->",
+  BANNER_KOTAK: "<!-- JuicyAds v3.0 -->
+<script type="text/javascript" data-cfasync="false" async src="https://poweredby.jads.co/js/jads.js"></script>
+<ins id="1126785" data-width="300" data-height="50"></ins>
+<script type="text/javascript" data-cfasync="false" async>(adsbyjuicy = window.adsbyjuicy || []).push({'adzone':1126785});</script>
+<!--JuicyAds END-->",
+  BANNER_HORIZONTAL: "<!-- JuicyAds v3.0 -->
+<script type="text/javascript" data-cfasync="false" async src="https://poweredby.jads.co/js/jads.js"></script>
+<ins id="1126784" data-width="728" data-height="90"></ins>
+<script type="text/javascript" data-cfasync="false" async>(adsbyjuicy = window.adsbyjuicy || []).push({'adzone':1126784});</script>
+<!--JuicyAds END-->",
 };
 
 export const DRAMAS_DATA: Drama[] = [

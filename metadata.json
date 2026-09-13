@@ -1,0 +1,6 @@
+{
+  "name": "X-VIDEY - Premium Drama & Movie Streaming",
+  "description": "Nonton streaming drama dan film online terlengkap kualitas HD dengan subtitle Indonesia. Koleksi film terpopuler, rilis terbaru, dan video player interaktif.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

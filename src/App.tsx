@@ -213,6 +213,30 @@ export default function App() {
     };
   }, []);
 
+  // Popunder monetization script injection
+  useEffect(() => {
+    const rawPopunder = AD_CONFIG.POPUNDER_LINK;
+    if (!rawPopunder || rawPopunder.includes('Paste script iklan')) return;
+
+    const srcMatch = rawPopunder.match(/src=["']([^"']+)["']/);
+    const scriptSrc = srcMatch ? srcMatch[1] : null;
+
+    if (scriptSrc) {
+      const script = document.createElement('script');
+      script.src = scriptSrc;
+      script.async = true;
+      script.id = 'popunder-ad-script';
+      document.body.appendChild(script);
+
+      return () => {
+        const existing = document.getElementById('popunder-ad-script');
+        if (existing) {
+          existing.remove();
+        }
+      };
+    }
+  }, []);
+
   // Toggle Night / Light Mode
   const toggleTheme = () => {
     setIsLightMode((prev) => {

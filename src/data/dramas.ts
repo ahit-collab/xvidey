@@ -1,17 +1,38 @@
 import { Drama } from '../types';
 
 export const AD_CONFIG = {
-  DIRECT_LINK: "<!-- Paste script iklan DIRECT LINK di sini -->",
-  BANNER_KOTAK: `<!-- JuicyAds v3.0 -->
-<script type="text/javascript" data-cfasync="false" async src="https://poweredby.jads.co/js/jads.js"></script>
-<ins id="1126785" data-width="300" data-height="50"></ins>
-<script type="text/javascript" data-cfasync="false" async>(adsbyjuicy = window.adsbyjuicy || []).push({'adzone':1126785});</script>
-<!--JuicyAds END-->`,
-  BANNER_HORIZONTAL: `<!-- JuicyAds v3.0 -->
-<script type="text/javascript" data-cfasync="false" async src="https://poweredby.jads.co/js/jads.js"></script>
-<ins id="1126784" data-width="728" data-height="90"></ins>
-<script type="text/javascript" data-cfasync="false" async>(adsbyjuicy = window.adsbyjuicy || []).push({'adzone':1126784});</script>
-<!--JuicyAds END-->`,
+  POPUNDER_LINK: `<script src="https://landslidegraphsystems.com/ad/a0/fb/ada0fbb46cee3478888384a89b3526e4.js"></script>`,
+  DIRECT_LINK: `https://landslidegraphsystems.com/h028dczkx?key=9fc7ff10c56484551924fe3a90bf5062`,
+  BANNER_KOTAK: `<script>
+  atOptions = {
+    'key' : '2dc81724611cd54ca49d7a91d844fb69',
+    'format' : 'iframe',
+    'height' : 50,
+    'width' : 320,
+    'params' : {}
+  };
+</script>
+<script src="https://landslidegraphsystems.com/2dc81724611cd54ca49d7a91d844fb69/invoke.js"></script>
+<script>
+  atOptions = {
+    'key' : '8a3654096ea6956d96983d9b1d81301f',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://landslidegraphsystems.com/8a3654096ea6956d96983d9b1d81301f/invoke.js"></script>`,
+  BANNER_HORIZONTAL: `<script>
+  atOptions = {
+    'key' : 'e846c889a66aed61a429bb27642a4e1c',
+    'format' : 'iframe',
+    'height' : 90,
+    'width' : 728,
+    'params' : {}
+  };
+</script>
+<script src="https://landslidegraphsystems.com/e846c889a66aed61a429bb27642a4e1c/invoke.js"></script>`,
 };
 
 export const DRAMAS_DATA: Drama[] = [

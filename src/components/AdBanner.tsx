@@ -27,18 +27,22 @@ export const AdBanner: React.FC<AdBannerProps> = ({ type, className = '', onAdCl
     temp.innerHTML = rawCode;
 
     // Append standard elements & re-create <script> tags so browser executes them
-    Array.from(temp.childNodes).forEach((node) => {
-      if (node.nodeName === 'SCRIPT') {
-        const oldScript = node as HTMLScriptElement;
-        const newScript = document.createElement('script');
-        Array.from(oldScript.attributes).forEach((attr) => {
-          newScript.setAttribute(attr.name, attr.value);
-        });
-        newScript.textContent = oldScript.textContent;
-        container.appendChild(newScript);
-      } else {
-        container.appendChild(node.cloneNode(true));
-      }
+    const scriptElements = temp.querySelectorAll('script');
+    const nonScripts = Array.from(temp.childNodes).filter((node) => node.nodeName !== 'SCRIPT');
+
+    // Append non-script nodes first (e.g. ins, div, iframe containers)
+    nonScripts.forEach((node) => {
+      container.appendChild(node.cloneNode(true));
+    });
+
+    // Execute scripts sequentially
+    scriptElements.forEach((oldScript) => {
+      const newScript = document.createElement('script');
+      Array.from(oldScript.attributes).forEach((attr) => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+      newScript.textContent = oldScript.textContent;
+      container.appendChild(newScript);
     });
   }, [rawCode, isDefaultPlaceholder]);
 

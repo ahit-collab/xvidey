@@ -15,36 +15,65 @@ export const AdBanner: React.FC<AdBannerProps> = ({ type, className = '', onAdCl
   const rawCode = type === 'horizontal' ? AD_CONFIG.BANNER_HORIZONTAL : AD_CONFIG.BANNER_KOTAK;
   const isDefaultPlaceholder = !rawCode || rawCode.includes('Paste script iklan');
 
-  // Dynamically execute embedded script tags for networks like JuicyAds / Google Ads / Adsterra
+  // Safely execute ad network scripts inside an isolated sandboxed-friendly iframe to prevent cross-origin script errors
   useEffect(() => {
     if (isDefaultPlaceholder || !containerRef.current) return;
 
     const container = containerRef.current;
     container.innerHTML = '';
 
-    // Create a temporary element to parse tags
-    const temp = document.createElement('div');
-    temp.innerHTML = rawCode;
+    // Create an iframe to safely isolate third-party ad scripts (e.g. atOptions, adsterra, landslidegraphsystems)
+    const iframe = document.createElement('iframe');
+    iframe.title = slotLabel || 'Advertisement';
+    iframe.scrolling = 'no';
+    iframe.style.border = 'none';
+    iframe.style.overflow = 'hidden';
+    iframe.style.width = type === 'horizontal' ? '728px' : '320px';
+    iframe.style.maxWidth = '100%';
+    iframe.style.minHeight = type === 'horizontal' ? '90px' : '250px';
 
-    // Append standard elements & re-create <script> tags so browser executes them
-    const scriptElements = temp.querySelectorAll('script');
-    const nonScripts = Array.from(temp.childNodes).filter((node) => node.nodeName !== 'SCRIPT');
+    container.appendChild(iframe);
 
-    // Append non-script nodes first (e.g. ins, div, iframe containers)
-    nonScripts.forEach((node) => {
-      container.appendChild(node.cloneNode(true));
-    });
-
-    // Execute scripts sequentially
-    scriptElements.forEach((oldScript) => {
-      const newScript = document.createElement('script');
-      Array.from(oldScript.attributes).forEach((attr) => {
-        newScript.setAttribute(attr.name, attr.value);
+    try {
+      const doc = iframe.contentWindow?.document || iframe.contentDocument;
+      if (doc) {
+        doc.open();
+        doc.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <script>
+                window.onerror = function() { return true; };
+                window.addEventListener('error', function(e) { e.preventDefault(); e.stopImmediatePropagation(); return true; }, true);
+                window.addEventListener('unhandledrejection', function(e) { e.preventDefault(); e.stopImmediatePropagation(); }, true);
+              </script>
+              <style>
+                body { margin: 0; padding: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; background: transparent; }
+              </style>
+            </head>
+            <body>
+              ${rawCode}
+            </body>
+          </html>
+        `);
+        doc.close();
+      }
+    } catch {
+      // Fallback: direct insertion in case iframe write is restricted
+      const temp = document.createElement('div');
+      temp.innerHTML = rawCode;
+      const scriptElements = temp.querySelectorAll('script');
+      const nonScripts = Array.from(temp.childNodes).filter((node) => node.nodeName !== 'SCRIPT');
+      nonScripts.forEach((node) => container.appendChild(node.cloneNode(true)));
+      scriptElements.forEach((oldScript) => {
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach((attr) => newScript.setAttribute(attr.name, attr.value));
+        newScript.textContent = oldScript.textContent;
+        container.appendChild(newScript);
       });
-      newScript.textContent = oldScript.textContent;
-      container.appendChild(newScript);
-    });
-  }, [rawCode, isDefaultPlaceholder]);
+    }
+  }, [rawCode, isDefaultPlaceholder, type, slotLabel]);
 
   const slotId = id || (type === 'horizontal' ? 'ad-banner-horizontal-slot' : 'ad-banner-kotak-slot');
 

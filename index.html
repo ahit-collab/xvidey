@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="id">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>X-VIDEY - Premium Drama & Movie Streaming</title>
-    <meta name="description" content="Nonton streaming drama dan film online terlengkap kualitas HD dengan subtitle Indonesia. Koleksi film terpopuler, rilis terbaru, dan video player interaktif." />
-    <meta name="keywords" content="streaming film, drama asia, nonton film gratis, video player, film layar lebar, hd streaming" />
+    <meta name="description" content="Watch full HD drama and movie streaming online with English subtitles. Discover trending series, new releases, and interactive video players." />
+    <meta name="keywords" content="drama streaming, asian drama, watch movies online, hd video player, movies, tv series" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#0b0b0e" />
 
@@ -13,26 +13,72 @@
     <meta property="og:type" content="video.other" />
     <meta property="og:site_name" content="X-VIDEY" />
     <meta property="og:title" content="X-VIDEY - Premium Drama & Movie Streaming" />
-    <meta property="og:description" content="Nonton streaming drama dan film online terlengkap kualitas HD dengan subtitle Indonesia. Koleksi film terpopuler, rilis terbaru, dan video player interaktif." />
+    <meta property="og:description" content="Watch full HD drama and movie streaming online with English subtitles. Discover trending series, new releases, and interactive video players." />
     <meta property="og:url" content="https://x-videy.stream" />
-    <meta property="og:image" content="https://static-sg-cdn.eporner.com/thumbs/static4/1/16/166/16658579/9_360.jpg" />
-    <meta property="og:image:secure_url" content="https://static-sg-cdn.eporner.com/thumbs/static4/1/16/166/16658579/9_360.jpg" />
+    <meta property="og:image" content="https://cdn.aceimg.com/NUlgJtXXL.jpg" />
+    <meta property="og:image:secure_url" content="https://cdn.aceimg.com/NUlgJtXXL.jpg" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="X-VIDEY - Premium Drama & Movie Streaming" />
-    <meta property="og:locale" content="id_ID" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="X-VIDEY - Premium Drama & Movie Streaming" />
-    <meta name="twitter:description" content="Nonton streaming drama dan film online terlengkap kualitas HD dengan subtitle Indonesia. Koleksi film terpopuler, rilis terbaru, dan video player interaktif." />
-    <meta name="twitter:image" content="https://static-sg-cdn.eporner.com/thumbs/static4/1/16/166/16658579/9_360.jpg" />
+    <meta name="twitter:description" content="Watch full HD drama and movie streaming online with English subtitles. Discover trending series, new releases, and interactive video players." />
+    <meta name="twitter:image" content="https://cdn.aceimg.com/NUlgJtXXL.jpg" />
     <meta name="twitter:image:alt" content="X-VIDEY - Premium Drama & Movie Streaming" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Global Third-Party / Cross-Origin Script Error Shield -->
+    <script>
+      (function() {
+        function isExternalOrGeneric(msg, url) {
+          if (!msg && !url) return true;
+          var m = String(msg || '');
+          var u = String(url || '');
+          return (
+            m.indexOf('Script error') !== -1 ||
+            u.indexOf('landslidegraphsystems') !== -1 ||
+            u.indexOf('histats') !== -1 ||
+            u.indexOf('googlesyndication') !== -1 ||
+            (u && u.indexOf(window.location.hostname) === -1)
+          );
+        }
+
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+          if (isExternalOrGeneric(msg, url)) {
+            return true; // Suppress third-party / cross-origin script errors
+          }
+          return false;
+        };
+
+        window.addEventListener('error', function(event) {
+          if (isExternalOrGeneric(event.message, event.filename)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = event.reason;
+          var msg = reason ? (reason.message || String(reason)) : '';
+          if (
+            msg.indexOf('Script error') !== -1 ||
+            msg.indexOf('Failed to fetch') !== -1 ||
+            msg.indexOf('NetworkError') !== -1
+          ) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }, true);
+      })();
+    </script>
   </head>
   <body 
     class="bg-[#0b0b0e] text-slate-100 antialiased font-['Plus_Jakarta_Sans',sans-serif] select-none"
@@ -49,9 +95,14 @@
       _Hasync.push(['Histats.fasi', '1']);
       _Hasync.push(['Histats.track_hits', '']);
       (function() {
-        var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
-        hs.src = ('//s10.histats.com/js15_as.js');
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+        try {
+          var hs = document.createElement('script');
+          hs.type = 'text/javascript';
+          hs.async = true;
+          hs.src = 'https://s10.histats.com/js15_as.js';
+          hs.onerror = function() {};
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+        } catch(e) {}
       })();
     </script>
     <noscript>

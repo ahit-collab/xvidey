@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, Play, Pause, Volume2, VolumeX, Maximize, RotateCcw, 
-  Share2, Plus, Check, Flame, Film, Server
+  Share2, Plus, Check, Flame, Film, Server, ExternalLink
 } from 'lucide-react';
 import { Drama } from '../types';
 import { AdBanner } from './AdBanner';
@@ -61,6 +61,13 @@ export const VideoModal: React.FC<VideoModalProps> = ({
     }
   };
 
+  const handlePlayerClick = () => {
+    if (onAdTrigger) {
+      onAdTrigger();
+    }
+    togglePlay();
+  };
+
   const toggleMute = () => {
     if (!videoRef.current) return;
     videoRef.current.muted = !isMuted;
@@ -103,12 +110,32 @@ export const VideoModal: React.FC<VideoModalProps> = ({
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping" />
             <span className="text-xs font-bold uppercase tracking-wider text-red-500">
-              Sedang Memutar: Episode {currentEpisode}
+              Now Playing: Episode {currentEpisode}
             </span>
             <span className="text-xs text-slate-400 hidden sm:inline">· {drama.title}</span>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Open Watch in New Tab Button */}
+            <a
+              id="modal-header-new-tab-btn"
+              href={AD_CONFIG.DIRECT_LINK || drama.embedUrl || drama.videoUrl || `?watch=${drama.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                if (onAdTrigger) onAdTrigger();
+              }}
+              className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs font-bold transition border shadow-sm ${
+                isLightMode 
+                  ? 'bg-red-50 hover:bg-red-100 border-red-200 text-red-600' 
+                  : 'bg-red-600/20 hover:bg-red-600/30 border-red-500/30 text-red-400'
+              }`}
+              title="Buka di Tab Baru (Open in New Tab)"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-red-500" />
+              <span className="hidden sm:inline">Buka di Tab Baru</span>
+            </a>
+
             {/* Close Button */}
             <button
               id="modal-close-button"
@@ -116,7 +143,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
               className={`p-1.5 rounded-full transition ${
                 isLightMode ? 'hover:bg-slate-200 text-slate-700' : 'hover:bg-slate-800 text-slate-300'
               }`}
-              title="Tutup (Esc)"
+              title="Close (Esc)"
             >
               <X className="w-5 h-5" />
             </button>
@@ -141,7 +168,8 @@ export const VideoModal: React.FC<VideoModalProps> = ({
                 autoPlay
                 playsInline
                 loop
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain cursor-pointer"
+                onClick={handlePlayerClick}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
               />
@@ -149,14 +177,14 @@ export const VideoModal: React.FC<VideoModalProps> = ({
               {/* Watermark Logo in video */}
               <div className="absolute top-4 left-4 pointer-events-none opacity-70">
                 <div className="text-xs font-black tracking-widest text-white/80 bg-black/40 px-2 py-1 rounded backdrop-blur-sm">
-                  DRAMA<span className="text-red-600">KU</span>
+                  X-<span className="text-red-600">VIDEY</span>
                 </div>
               </div>
 
               {/* Center Play/Pause big button when paused */}
               {!isPlaying && (
                 <button
-                  onClick={togglePlay}
+                  onClick={handlePlayerClick}
                   className="absolute w-16 h-16 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-2xl hover:scale-110 transition duration-300"
                 >
                   <Play className="w-8 h-8 fill-white ml-1" />
@@ -167,7 +195,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={togglePlay}
+                    onClick={handlePlayerClick}
                     className="text-white hover:text-red-500 transition p-1"
                   >
                     {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 fill-white" />}
@@ -207,6 +235,33 @@ export const VideoModal: React.FC<VideoModalProps> = ({
               </div>
             </>
           )}
+        </div>
+
+        {/* Watch Page CTA Bar: Opens in New Tab */}
+        <div className={`px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 border-b ${
+          isLightMode ? 'bg-red-50 border-slate-200 text-slate-800' : 'bg-[#15151e] border-slate-800 text-slate-200'
+        }`}>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+            <span className="font-bold text-red-500">Pemutar Streaming HD:</span>
+            <span className="text-slate-400 text-[11px] sm:text-xs">Klik untuk menonton film di tab baru secara lancar</span>
+          </div>
+          <a
+            id="watch-page-direct-banner-btn"
+            href={AD_CONFIG.DIRECT_LINK || drama.embedUrl || drama.videoUrl || `?watch=${drama.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              if (onAdTrigger) onAdTrigger();
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold text-xs shadow-md shadow-red-600/30 transition transform hover:scale-105 active:scale-95"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Nonton di Tab Baru</span>
+          </a>
         </div>
 
         {/* Server Selection & Episodes */}
@@ -276,7 +331,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-red-600/20 text-red-500 border border-red-500/30">
-                  {drama.type}
+                  {drama.type === 'Film Layar Lebar' ? 'Feature Film' : drama.type === 'Drama Seri' ? 'Drama Series' : drama.type}
                 </span>
                 <span 
                   className="flex items-center justify-center p-1 rounded-md bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-sm border border-white/20"
@@ -304,6 +359,20 @@ export const VideoModal: React.FC<VideoModalProps> = ({
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
+              <a
+                id="watch-modal-primary-cta"
+                href={AD_CONFIG.DIRECT_LINK || drama.embedUrl || drama.videoUrl || `?watch=${drama.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  if (onAdTrigger) onAdTrigger();
+                }}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white shadow-lg shadow-red-600/30 transition transform hover:scale-105 active:scale-95"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span>Nonton di Tab Baru</span>
+              </a>
+
               <button
                 onClick={() => onToggleMyList(drama)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition shadow ${

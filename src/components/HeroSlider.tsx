@@ -66,6 +66,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
           <button
             id="hero-watch-button"
             onClick={() => onPlay(drama)}
+            title={`Nonton ${drama.title} (Buka di Tab Baru)`}
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold shadow-lg transition duration-200 hover:scale-105 active:scale-95"
           >
             <Play className="w-4 h-4 fill-white" />

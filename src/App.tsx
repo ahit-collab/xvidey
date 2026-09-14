@@ -12,13 +12,58 @@ import { VideoModal } from './components/VideoModal';
 import { AdBanner } from './components/AdBanner';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { Pagination } from './components/Pagination';
+import { AntiAdblockModal } from './components/AntiAdblockModal';
 
 export default function App() {
   // Navigation & View State
   const [currentTab, setCurrentTab] = useState<NavTab>('home');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('Semua');
-  const [selectedDrama, setSelectedDrama] = useState<Drama | null>(null);
+  const [selectedGenre, setSelectedGenre] = useState('All');
+  
+  // Initialize selectedDrama from URL param (?watch= or ?id=) so watch links open in a new tab directly
+  const [selectedDrama, setSelectedDrama] = useState<Drama | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const watchId = params.get('watch') || params.get('id');
+        if (watchId) {
+          const found = DRAMAS_DATA.find((d) => d.id === watchId);
+          if (found) return found;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return null;
+  });
+
+  // Sync active drama with URL parameter
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (selectedDrama) {
+        params.set('watch', selectedDrama.id);
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+        document.title = `${selectedDrama.title} - Watch Online | X-VIDEY`;
+      } else {
+        if (params.has('watch') || params.has('id')) {
+          params.delete('watch');
+          params.delete('id');
+          const qs = params.toString();
+          const newUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+        }
+        document.title = 'X-VIDEY - Premium Drama & Movie Streaming';
+      }
+    } catch {
+      // Fallback for sandboxed environments
+    }
+  }, [selectedDrama]);
+
+  // Anti-Adblock Detection State
+  const [isAdBlockActive, setIsAdBlockActive] = useState<boolean>(false);
 
   // Night / Light Mode (#0b0b0e Dark vs #f8fafc Light)
   const [isLightMode, setIsLightMode] = useState<boolean>(() => {
@@ -122,7 +167,7 @@ export default function App() {
         return;
       }
       e.preventDefault();
-      addToast('Konten dilindungi! Klik kanan dinonaktifkan.', 'warning');
+      addToast('Content protected! Right-click disabled.', 'warning');
     };
 
     // 2. Block Copy & Cut outside form inputs
@@ -132,7 +177,7 @@ export default function App() {
         return;
       }
       e.preventDefault();
-      addToast('Dilarang menyalin teks atau konten dari situs ini!', 'warning');
+      addToast('Copying text or content from this site is disabled!', 'warning');
     };
 
     const handleCut = (e: ClipboardEvent) => {
@@ -159,7 +204,7 @@ export default function App() {
       // F12 (DevTools)
       if (e.key === 'F12') {
         e.preventDefault();
-        addToast('Developer tools dinonaktifkan.', 'warning');
+        addToast('Developer tools disabled.', 'warning');
         return;
       }
 
@@ -168,31 +213,31 @@ export default function App() {
         // Ctrl+U (View Source)
         if (e.key === 'u' || e.key === 'U') {
           e.preventDefault();
-          addToast('Akses source code dinonaktifkan.', 'warning');
+          addToast('Source code access disabled.', 'warning');
           return;
         }
         // Ctrl+S (Save Page)
         if (e.key === 's' || e.key === 'S') {
           e.preventDefault();
-          addToast('Menyimpan halaman dinonaktifkan.', 'warning');
+          addToast('Saving page disabled.', 'warning');
           return;
         }
         // Ctrl+Shift+I / J / C (Inspect/Devtools)
         if (e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) {
           e.preventDefault();
-          addToast('Inspect element dinonaktifkan.', 'warning');
+          addToast('Inspect element disabled.', 'warning');
           return;
         }
         // Ctrl+C (Copy outside input)
         if (!isInput && (e.key === 'c' || e.key === 'C')) {
           e.preventDefault();
-          addToast('Menyalin konten dinonaktifkan.', 'warning');
+          addToast('Copying content disabled.', 'warning');
           return;
         }
         // Ctrl+P (Print Page)
         if (e.key === 'p' || e.key === 'P') {
           e.preventDefault();
-          addToast('Pencetakan halaman dinonaktifkan.', 'warning');
+          addToast('Page printing disabled.', 'warning');
           return;
         }
       }
@@ -218,6 +263,16 @@ export default function App() {
     const rawPopunder = AD_CONFIG.POPUNDER_LINK;
     if (!rawPopunder || rawPopunder.includes('Paste script iklan')) return;
 
+    // In cross-origin iframes (like AI Studio preview), third-party popunder scripts throw SecurityError when querying parent frame
+    const isInIframe = (() => {
+      try {
+        return window.self !== window.top;
+      } catch {
+        return true;
+      }
+    })();
+    if (isInIframe) return;
+
     const srcMatch = rawPopunder.match(/src=["']([^"']+)["']/);
     const scriptSrc = srcMatch ? srcMatch[1] : null;
 
@@ -226,6 +281,9 @@ export default function App() {
       script.src = scriptSrc;
       script.async = true;
       script.id = 'popunder-ad-script';
+      script.onerror = () => {
+        // Silently catch third-party network or adblock errors
+      };
       document.body.appendChild(script);
 
       return () => {
@@ -236,6 +294,88 @@ export default function App() {
       };
     }
   }, []);
+
+  // Anti AdBlock Detection Engine
+  useEffect(() => {
+    let checkTimer: NodeJS.Timeout;
+
+    const runAdBlockCheck = () => {
+      let isBlocked = false;
+
+      // Check 1: Bait DOM element with common ad class names
+      const bait = document.createElement('div');
+      bait.setAttribute(
+        'class',
+        'pub_300x250 pub_300x250m pub_728x90 text-ad textAd text_ad text_ads text-ads ad-placement adsbygoogle banner-ad ads-banner advertisement'
+      );
+      bait.setAttribute(
+        'style',
+        'position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px;'
+      );
+      document.body.appendChild(bait);
+
+      // Check bait visibility
+      const baitStyle = window.getComputedStyle(bait);
+      if (
+        baitStyle.display === 'none' ||
+        baitStyle.visibility === 'hidden' ||
+        bait.offsetParent === null ||
+        bait.offsetHeight === 0 ||
+        bait.offsetWidth === 0
+      ) {
+        isBlocked = true;
+      }
+      bait.remove();
+
+      if (isBlocked) {
+        setIsAdBlockActive(true);
+        return;
+      }
+
+      // Check 2: Test if standard ad class gets collapsed by cosmetic filtering
+      const testIns = document.createElement('ins');
+      testIns.className = 'adsbygoogle ad-placement pub_728x90';
+      testIns.style.cssText = 'position:absolute !important; top:-9999px !important; left:-9999px !important; width:100px !important; height:100px !important; display:block !important;';
+      document.body.appendChild(testIns);
+      const insStyle = window.getComputedStyle(testIns);
+      if (insStyle.display === 'none' || insStyle.visibility === 'hidden' || testIns.offsetHeight === 0) {
+        isBlocked = true;
+      }
+      testIns.remove();
+
+      if (isBlocked) {
+        setIsAdBlockActive(true);
+        return;
+      }
+
+      // Check 3: Check if ad elements inside DOM are collapsed or hidden
+      const adSlots = document.querySelectorAll('[id*="ad-banner"], [id*="histats"]');
+      adSlots.forEach((slot) => {
+        const style = window.getComputedStyle(slot);
+        if (style.display === 'none' || style.visibility === 'hidden') {
+          isBlocked = true;
+        }
+      });
+
+      if (isBlocked) {
+        setIsAdBlockActive(true);
+      }
+    };
+
+    // Initial check after delay to allow DOM & extension injection
+    checkTimer = setTimeout(() => {
+      runAdBlockCheck();
+    }, 1500);
+
+    return () => {
+      clearTimeout(checkTimer);
+    };
+  }, []);
+
+  // Refresh page handler for anti-adblock modal
+  const handleAdBlockRefresh = () => {
+    window.location.reload();
+  };
 
   // Toggle Night / Light Mode
   const toggleTheme = () => {
@@ -263,12 +403,20 @@ export default function App() {
     });
   };
 
-  // Dual Action: Open Video Player Modal AND trigger DIRECT_LINK
+  // Dual Action: Open Watch Page in a New Tab AND trigger DIRECT_LINK / modal
   const handleWatchClick = (drama: Drama) => {
-    // 1. Open Video Modal
+    // 1. Open Watch Page in a New Tab (as requested: "pada halaman watch page mengarah ke tab baru")
+    const watchUrl = `?watch=${encodeURIComponent(drama.id)}`;
+    try {
+      window.open(watchUrl, '_blank');
+    } catch {
+      // In case popup is blocked or restricted
+    }
+
+    // 2. Open Video Modal in current tab for immediate feedback
     setSelectedDrama(drama);
 
-    // 2. Dual Action: Trigger Direct Link
+    // 3. Dual Action: Trigger Direct Link Monetization
     handleAdTrigger();
   };
 
@@ -454,17 +602,17 @@ export default function App() {
                         <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${
                           isLightMode ? 'text-slate-900' : 'text-white'
                         }`}>
-                          Semua Video
+                          All Videos
                         </h2>
                         <p className={`text-xs mt-0.5 ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                          Menampilkan seluruh koleksi ({homeDramas.length} video) berurutan dari baris pertama database film
+                          Displaying entire collection ({homeDramas.length} videos) sequentially from the movie catalog
                         </p>
                       </div>
                     </div>
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
                       isLightMode ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-300'
                     }`}>
-                      Halaman {currentPage} dari {Math.ceil(homeDramas.length / ITEMS_PER_PAGE)}
+                      Page {currentPage} of {Math.ceil(homeDramas.length / ITEMS_PER_PAGE)}
                     </span>
                   </div>
 
@@ -873,6 +1021,13 @@ export default function App() {
         isInMyList={selectedDrama ? myList.includes(selectedDrama.id) : false}
         onToggleMyList={toggleMyList}
         onAdTrigger={handleAdTrigger}
+        isLightMode={isLightMode}
+      />
+
+      {/* Anti-Adblock Warning & Lock Modal */}
+      <AntiAdblockModal
+        isOpen={isAdBlockActive}
+        onRefresh={handleAdBlockRefresh}
         isLightMode={isLightMode}
       />
     </div>

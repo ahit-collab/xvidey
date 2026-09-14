@@ -26,6 +26,7 @@ export const DramaCard: React.FC<DramaCardProps> = ({
       id={`drama-card-${drama.id}`}
       className="group flex flex-col cursor-pointer transition-all duration-300"
       onClick={() => onSelect(drama)}
+      title={`Nonton ${drama.title} (Buka di Tab Baru)`}
     >
       {/* Poster Container */}
       <div className={`relative w-full aspect-[2/3] rounded-xl sm:rounded-2xl overflow-hidden shadow-md sm:shadow-lg border transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 ${

@@ -844,6 +844,11 @@ export default function App() {
           <p className="text-[11px] text-slate-600 pt-2">
             © 2025 X-VIDEY. All rights reserved.
           </p>
+
+          {/* Histats.com Counter Widget */}
+          <div className="flex flex-col items-center justify-center pt-2 pb-6 sm:pb-0">
+            <div id="histats_counter" className="inline-block min-h-[20px]"></div>
+          </div>
         </div>
       </footer>
 
